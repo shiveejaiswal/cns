@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 26
+#define MAX_TEXT_SIZE 100
+
+void encrypt(char *text, char *key, char *result);
+void decrypt(char *text, char *key, char *result);
+void process_key(char *key, char *processed_key);
+
+int main() {
+    char plaintext[MAX_TEXT_SIZE], key[MAX_TEXT_SIZE], processed_key[ALPHABET_SIZE + 1];
+    char ciphertext[MAX_TEXT_SIZE], decryptedtext[MAX_TEXT_SIZE];
+
+    printf("Enter the plaintext: ");
+    fgets(plaintext, MAX_TEXT_SIZE, stdin);
+    plaintext[strcspn(plaintext, "\n")] = 0;
+
+    printf("Enter the key: ");
+    fgets(key, MAX_TEXT_SIZE, stdin);
+    key[strcspn(key, "\n")] = 0;
+
+    process_key(key, processed_key);
+
+    encrypt(plaintext, processed_key, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+
+    decrypt(ciphertext, processed_key, decryptedtext);
+    printf("Decrypted text: %s\n", decryptedtext);
+
+    return 0;
+}
+
+void process_key(char *key, char *processed_key) {
+    int used[ALPHABET_SIZE] = {0}, i, k = 0;
+    for (i = 0; key[i] != '\0' && k < ALPHABET_SIZE; i++) {
+        char ch = toupper(key[i]);
+        if (isalpha(ch) && !used[ch - 'A']) {
+            processed_key[k++] = ch;
+            used[ch - 'A'] = 1;
+        }
+    }
+    for (i = 0; i < ALPHABET_SIZE; i++) {
+        if (!used[i]) {
+            processed_key[k++] = 'A' + i;
+        }
+    }
+    processed_key[ALPHABET_SIZE] = '\0';
+}
+
+void encrypt(char *text, char *key, char *result) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i])) {
+            if (isupper(text[i])) {
+                result[i] = key[text[i] - 'A'];
+            } else {
+                result[i] = tolower(key[text[i] - 'a']);
+            }
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
+
+void decrypt(char *text, char *key, char *result) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i])) {
+            for (int j = 0; j < ALPHABET_SIZE; j++) {
+                if (toupper(text[i]) == key[j]) {
+                    result[i] = isupper(text[i]) ? 'A' + j : 'a' + j;
+                    break;
+                }
+            }
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
